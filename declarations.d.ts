@@ -1,0 +1,10 @@
+declare module 'swr';
+declare module 'axios';
+declare module 'firebase';
+declare module 'firebase/firestore';
+declare module 'firebase/compat/app';
+declare module 'react-router-dom';
+declare module 'react-dimensions';
+declare module 'react-scroll';
+declare module 'styled-components';
+declare module '@types/react-router-dom';
