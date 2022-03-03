@@ -19,6 +19,7 @@ import {
 import SideMenu from "../../components/SideMenu";
 import RequestItem from './RequestItem';
 
+import { useAuth } from "contexts/AuthContext";
 import db from '../../config/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import Datas from '../../constants/Datas';
@@ -26,6 +27,8 @@ import Datas from '../../constants/Datas';
 const Months = Datas.Months;
 
 export default function Request() {
+    const { isAuthenticated, user, signIn } = useAuth();
+
     const [formLoad, setFormLoad] = useState<boolean>(true);
     const [offerModal, setOfferModal] = useState<boolean>(false);
     const [budgetDataModal, setBudgetDataModal] = useState<any>([]);

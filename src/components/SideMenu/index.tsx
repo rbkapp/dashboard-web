@@ -16,12 +16,15 @@ import { MenuLateral } from './style';
 
 import usuarioAvatar from '../../assets/img/avatar.png';
 
+import { useAuth } from "contexts/AuthContext";
 interface SideMenuProps {
   opend?: string;
   displayMenu?: boolean;
 }
 
 const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
+  const { user } = useAuth();
+
   return (
     <MenuLateral
       style={{ display: displayMenu ? 'block' : 'none' }}
@@ -30,7 +33,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
       <div className="rebimboka">
         <img className="logo" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/logo_white.png" />
       </div>
-      
+
       <nav>
         <ul>
           <li>
@@ -47,7 +50,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
               <img className="bg" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/menu_top.png" />
             </div>
             <a
-              href="/request"
+              href="/partner/request"
               className={opend == 'request' ? 'menu-opend' : ''}
             >
               <div className="icone"><AiOutlineFileText /></div>
@@ -61,14 +64,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
             </div>
           </li>
           <li>
-          <div
+            <div
               className="top_bg"
               style={{ display: opend == 'budgets' ? 'block' : 'none' }}
             >
               <img className="bg" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/menu_top.png" />
             </div>
             <a
-              href="/budgets"
+              href="/partner/budgets"
               className={opend == 'budgets' ? 'menu-opend' : ''}
             >
               <div className="icone"><IoChatbubblesOutline /></div>
@@ -82,14 +85,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
             </div>
           </li>
           <li>
-          <div
+            <div
               className="top_bg"
               style={{ display: opend == 'users' ? 'block' : 'none' }}
             >
               <img className="bg" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/menu_top.png" />
             </div>
             <a
-              href="/users"
+              href="/partner/users"
               className={opend == 'users' ? 'menu-opend' : ''}
             >
               <div className="icone"><IoPeopleOutline /></div>
@@ -103,14 +106,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
             </div>
           </li>
           <li>
-          <div
+            <div
               className="top_bg"
               style={{ display: opend == 'settings' ? 'block' : 'none' }}
             >
               <img className="bg" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/menu_top.png" />
             </div>
             <a
-              href="/settings"
+              href="/partner/settings"
               className={opend == 'settings' ? 'menu-opend' : ''}
             >
               <div className="icone"><IoSettingsOutline /></div>
@@ -127,22 +130,24 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
       </nav>
 
       <div className="usuario-card">
-        <div className="avatar">
-          <img
-            className="status-normal"
-            src={usuarioAvatar}
-            alt="avatar"
-          />
-        </div>
+        {localStorage.getItem("userPhoto") != '' ? (
+          <div className="avatar">
+            <img
+              className="status-normal"
+              src={usuarioAvatar}
+              alt="avatar"
+            />
+          </div>
+        ) : null}
         <div className="infos">
-          <div className="nome">Ricardo Silva</div>
-          <div className="email">ricardosilva@teste.com</div>
+          <div className="nome">{localStorage.getItem("userName")}</div>
+          <div className="email">{localStorage.getItem("userEmail")}</div>
           <div className="botoes">
-            <a href="#">
+            <a href="/partner/settings">
               <div><AiOutlineBell /></div>
               <div>Opções</div>
             </a>
-            <a href="#">
+            <a href="/logout">
               <div><AiOutlineBell /></div>
               <div>Sair</div>
             </a>

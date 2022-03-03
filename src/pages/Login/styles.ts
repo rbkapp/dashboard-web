@@ -68,8 +68,16 @@ export const LoginBox = styled.div`
       display:flex;
       justify-content:center;
       margin-top:2.2em;
-      padding-top:30px;
+      padding-top:10px;
       border-top:1px solid #E9E7EE
+
+    }
+
+    .line{
+      width:100%;
+      height:1px;
+      padding:10px 0;
+      background-color:1px solid #E9E7EE;
 
     }
 
