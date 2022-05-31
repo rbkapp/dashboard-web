@@ -199,5 +199,10 @@ export const LoginBox = styled.div`
       text-decoration-line: underline;
     }
 
-
+    .register {
+      float: left;
+      width: 100%;
+      text-align: center;
+      padding: 15px 0;
+    }
 `;

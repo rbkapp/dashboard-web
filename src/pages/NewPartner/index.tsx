@@ -20,6 +20,8 @@ import {
 } from "../Login/styles";
 
 import { useAuth } from "contexts/AuthContext";
+import db from 'config/firebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export default function Login() {
     const authentication = getAuth();
@@ -39,50 +41,38 @@ export default function Login() {
         if (password.length < 6) {
             alert('Sua senha deve ter 6 caracteres ou mais, verifique!');
         } else {
-            checkUser(email, password);
+            checkUser(values);
         }
     }
 
-    const checkUser = async (email: string, password: string) => {
+    const checkUser = async (values: any) => {
+        const loginFormValues = values;
+        const email = loginFormValues.email || '';
+        const password = loginFormValues.password || '';
+
         setFormEditable(false);
 
         try {
             await signInWithEmailAndPassword(authentication, email, password)
                 .then((response: any) => {
-                    //console.log('user: '+JSON.stringify(response.user));
-
-                    localStorage.setItem("userId", response.user.uid);
-                    localStorage.setItem("userName", response.user.providerData.displayName);
-                    localStorage.setItem("userEmail", response.user.email);
-                    localStorage.setItem("userPhoneNumber", response.user.providerData.phoneNumber);
-                    localStorage.setItem("userPhoto", response.user.providerData.photoURL);
-                    localStorage.setItem("token", response.user.stsTokenManager.refreshToken);
-
-                    window.open('/partner/request', '_self')?.focus();
-                    setFormEditable(true);
+                    insertPartner(values, response.user.uid);
                 });
 
         } catch (err: any) {
             //console.error(err);
-            createUser(email, password);
+            createUser(values);
         }
     };
 
-    const createUser = async (email: string, password: string) => {
+    const createUser = async (values: any) => {
+        const loginFormValues = values;
+        const email = loginFormValues.email || '';
+        const password = loginFormValues.password || '';
+
         try {
             await createUserWithEmailAndPassword(authentication, email, password)
                 .then((response: any) => {
-                    //localstorageconsole.log('user: '+JSON.stringify(response.user));
-
-                    localStorage.setItem("userId", response.user.uid || '');
-                    localStorage.setItem("userName", response.user.providerData.displayName || '');
-                    localStorage.setItem("userEmail", response.user.email || '');
-                    localStorage.setItem("userPhoneNumber", response.user.providerData.phoneNumber || '');
-                    localStorage.setItem("userPhoto", response.user.providerData.photoURL || '');
-                    localStorage.setItem("token", response.user.stsTokenManager.refreshToken || '');
-
-                    window.open('/partner/request', '_self')?.focus();
-                    setFormEditable(true);
+                    insertPartner(values, response.user.uid);
                 });
 
         } catch (err: any) {
@@ -92,19 +82,67 @@ export default function Login() {
         }
     };
 
+    async function insertPartner(values: any, userId: string) {
+        const loginFormValues = values;
+        const partnerName = loginFormValues.partnerName || '';
+        const partnerCity = loginFormValues.partnerCity || '';
+        const partnerType = loginFormValues.partnerType || '';
+        const partnerDocument = loginFormValues.partnerDocument || '';
+        const partnerPhone = loginFormValues.partnerPhone || '';
+
+        try {
+            const refDoc = await addDoc(collection(db, 'partners'), {
+                user_id: userId,
+                name: partnerName,
+                city: partnerCity,
+                type: partnerType,
+                document: partnerDocument,
+                phone: partnerPhone,
+                status: true,
+                created_at: Timestamp.now()
+            })
+
+            insertPartnerAdmin(userId, refDoc.id);
+
+        } catch (err) {
+            alert(err);
+            setFormEditable(true);
+        }
+    }
+
+    async function insertPartnerAdmin(userId: string, partnerId: string) {
+
+        try {
+            const refDoc = await addDoc(collection(db, 'partners_admins'), {
+                user_id: userId,
+                partner_id: partnerId,
+                type: 1,
+                status: true,
+                created_at: Timestamp.now()
+            })
+
+            window.open('/', '_self')?.focus();
+            alert('Cadastro realizado, em breve entreremos em contato.');
+
+        } catch (err) {
+            alert(err);
+            setFormEditable(true);
+        }
+    }
+
     useEffect(() => {
         //localStorage.getItem("token") ? alert('token: '+ localStorage.getItem("token")) : alert('no token');
     }, []);
 
     return (
         <LoginArea
-            style={{height:'calc(180vh)'}}
+            style={{ height: 'calc(180vh)' }}
         >
             <LoginBox
-            style={{overflow: 'visible'}}
+                style={{ overflow: 'visible' }}
             >
                 <div className="titulo-area"
-                    style={{paddingTop: '18rem'}}
+                    style={{ paddingTop: '18rem' }}
                 >
                     <img className="logo" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/logo_white.png" />
                 </div>
@@ -150,7 +188,7 @@ export default function Login() {
                                         ]}
                                     >
                                         <MaskedInput
-                                            style={{height: '40px', borderRadius: '1rem'}}
+                                            style={{ height: '40px', borderRadius: '1rem' }}
                                             className="masked-input"
                                             mask="11.111.111/1111-11"
                                             maxLength={14}
@@ -168,11 +206,34 @@ export default function Login() {
                                         ]}
                                     >
                                         <select
-                                            style={{width: '100%', height: '40px', borderRadius: '1rem'}}
+                                            style={{ width: '100%', height: '40px', borderRadius: '1rem' }}
                                         >
                                             <option value="">Cidade</option>
-                                            <option value="PVH">Porto Velho - RO</option>
-                                            <option value="OTH">Outra cidade</option>
+                                            <option value="Porto Velho">Porto Velho - RO</option>
+                                            <option value="Outra">Outra cidade</option>
+                                        </select>
+                                    </FormItem>
+                                    <FormItem
+                                        name="partnerType"
+                                        required
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Por favor, selecione a categoria.",
+                                            },
+                                        ]}
+                                    >
+                                        <select
+                                            style={{
+                                                width: '100%',
+                                                height: '40px',
+                                                borderRadius: '1rem'
+                                            }}
+                                        >
+                                            <option value="">Categoria</option>
+                                            <option value="1">Motos</option>
+                                            <option value="2">Veículos leves</option>
+                                            <option value="3">Veículos pesados</option>
                                         </select>
                                     </FormItem>
                                     <FormItem
@@ -185,8 +246,12 @@ export default function Login() {
                                             },
                                         ]}
                                     >
-                                        <Input
-                                            placeholder="Seu Telefone"
+                                        <MaskedInput
+                                            style={{ height: '40px', borderRadius: '1rem' }}
+                                            className="masked-input"
+                                            mask="(11) 1 1111-1111"
+                                            maxLength={11}
+                                            placeholder="(00) 0 0000-0000"
                                         />
                                     </FormItem>
                                     <div className="line"></div>
@@ -203,7 +268,7 @@ export default function Login() {
                                         <Input
                                             placeholder="Responsável"
                                         />
-                                    </FormItem>                                    
+                                    </FormItem>
                                     <FormItem
                                         name="email"
                                         required

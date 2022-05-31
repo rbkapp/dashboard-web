@@ -29,6 +29,10 @@ const Months = Datas.Months;
 export default function Request() {
     const { isAuthenticated, user, signIn } = useAuth();
 
+    const userId = localStorage.getItem("userId") || '';
+    const partnerId = localStorage.getItem("partnerId") || '';
+    const partnerType = localStorage.getItem("partnerType") || '';
+
     const [formLoad, setFormLoad] = useState<boolean>(true);
     const [offerModal, setOfferModal] = useState<boolean>(false);
     const [budgetDataModal, setBudgetDataModal] = useState<any>([]);
@@ -55,6 +59,12 @@ export default function Request() {
 
     function handleFormValue(event: { target: { value: any; }; }) {
         setFormValue(event.target.value);
+    }
+    function handleFormWithdraw(event: { target: { value: any; }; }) {
+        setFormWithdrawal(!formWithdrawal);
+    }
+    function handleFormDelivery(event: { target: { value: any; }; }) {
+        setFormDelivery(!formDelivery);
     }
     function handleFormDeliveryValue(event: { target: { value: any; }; }) {
         setFormDeliveryValue(event.target.value);
@@ -84,7 +94,7 @@ export default function Request() {
         try {
             const refDoc = await addDoc(collection(db, 'budgets_offers'), {
                 budget_id: budgetDataModal.id,
-                partner_id: 'EIje2O927UGDe6mBo2ZK',
+                partner_id: partnerId,
                 created_at: Timestamp.now()
             })
             insertBudgetOfferChatItem(refDoc.id);
@@ -98,7 +108,7 @@ export default function Request() {
         try {
             const refDoc = await addDoc(collection(db, 'budgets_offers_chats'), {
                 budgets_offer_id: budgets_offer_id,
-                partner_id: 'EIje2O927UGDe6mBo2ZK',
+                partner_id: partnerId,
                 type: 1,
                 value: formValue,
                 withdrawal: formWithdrawal,
@@ -109,7 +119,7 @@ export default function Request() {
                 created_at: Timestamp.now()
             })
             setOfferModal(false);
-            window.open('/budgets/details/'+budgetDataModal.id, '_self')?.focus();
+            window.open('/partner/budgets/details/' + budgetDataModal.id, '_self')?.focus();
         } catch (err) {
             alert(err);
             setFormSendLoad(false);
@@ -119,6 +129,7 @@ export default function Request() {
     useEffect(() => {
         const loadDataBudgets = db
             .collection("budgets")
+            .where("type", '==', partnerType)
             .where("status", '==', 1)
             .orderBy("created_at", "desc")
             .onSnapshot(snap => {
@@ -126,23 +137,7 @@ export default function Request() {
                     id: doc.id,
                     ...doc.data(),
                 }))
-                if (data.length > 0) {
-                    const loadDataBudgetOfferItem = db
-                        .collection("budgets_offers")
-                        .where("budget_id", '==', data[0].id)
-                        .where("partner_id", '==', 'EIje2O927UGDe6mBo2ZK')
-                        .onSnapshot(snap2 => {
-                            const data2 = snap2.docs.map(doc2 => ({
-                                id: doc2.id,
-                                ...doc2.data(),
-                            }))
-
-                            if (data2.length == 0) {
-                                setBudgetsData([]);
-                                setBudgetsData(data);
-                            }
-                        });
-                }
+                setBudgetsData(data);
                 setFormLoad(false);
             });
         return () => {
@@ -206,33 +201,47 @@ export default function Request() {
 
                                             <div className="opcoesEntrega">
                                                 <div className="radio-opcao-item">
-                                                    <div className="iconeChecked"><IoCheckmarkSharp /></div>
-                                                    <input id="retirada" name="entrega" type="checkbox" disabled={formSendLoad} />
-                                                    <label htmlFor="retirada">Retirada</label>
+                                                    <input
+                                                        id="retirada"
+                                                        name="entrega"
+                                                        type="checkbox"
+                                                        disabled={formSendLoad}
+                                                        checked={formWithdrawal}
+                                                        onChange={handleFormWithdraw}
+                                                    />
+                                                    <label style={{padding: '0 35px 0 5px'}} htmlFor="retirada"> Retirada</label>
                                                 </div>
 
                                                 <div className="radio-opcao-item">
-                                                    <div className="iconeChecked"><IoCheckmarkSharp /></div>
-                                                    <input id="entrega" name="entrega" type="checkbox" disabled={formSendLoad} />
-                                                    <label htmlFor="entrega">Entrega</label>
+                                                    <input
+                                                        id="entrega"
+                                                        name="entrega"
+                                                        type="checkbox"
+                                                        disabled={formSendLoad}
+                                                        checked={formDelivery}
+                                                        onChange={handleFormDelivery}
+                                                    />
+                                                    <label style={{padding: '0 0 0 5px'}} htmlFor="entrega" >Entrega</label>
                                                 </div>
 
-                                                <div>
+                                                <div style={{width: '30%'}}>
                                                     <input
+                                                        
                                                         id="delivery_value"
                                                         type="number"
                                                         placeholder="Valor"
                                                         onChange={handleFormDeliveryValue}
-                                                        disabled={formSendLoad}
+                                                        disabled={formSendLoad || !formDelivery}
                                                     />
                                                 </div>
 
-                                                <div>
+                                                <div style={{width: '30%'}}>
                                                     <select
+                                                        style={{width: '100%'}}
                                                         name=""
                                                         id="delivery_time"
                                                         onChange={handleFormDeliveryTime}
-                                                        disabled={formSendLoad}
+                                                        disabled={formSendLoad || !formDelivery}
                                                     >
                                                         <option value="">Selecione</option>
                                                         <option value="1">1 hora</option>
@@ -291,7 +300,7 @@ export default function Request() {
                     />
                     <Conteudo>
                         <TopFiltros>
-                            <div>Solicitações de orçamentos</div>
+                            <div>Solicitações</div>
                             <div className="botao-filtro">
                                 <FaSlidersH />
                             </div>

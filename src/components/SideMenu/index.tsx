@@ -130,17 +130,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
       </nav>
 
       <div className="usuario-card">
-        {localStorage.getItem("userPhoto") != '' ? (
+        {localStorage.getItem("userPhoto") != '' && localStorage.getItem("userPhoto") != 'undefined' ? (
           <div className="avatar">
             <img
               className="status-normal"
-              src={usuarioAvatar}
+              src={localStorage.getItem("userPhoto") || ''}
               alt="avatar"
             />
           </div>
         ) : null}
         <div className="infos">
-          <div className="nome">{localStorage.getItem("userName")}</div>
+          {localStorage.getItem("userName") != '' && localStorage.getItem("userName") != 'undefined' ? (
+            <div className="nome">{localStorage.getItem("userName")}</div>
+          ) : null}
           <div className="email">{localStorage.getItem("userEmail")}</div>
           <div className="botoes">
             <a href="/partner/settings">

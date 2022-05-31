@@ -20,6 +20,10 @@ import Datas from '../../constants/Datas';
 const Months = Datas.Months;
 
 export default function Request() {
+    const userId = localStorage.getItem("userId") || '';
+    const partnerId = localStorage.getItem("partnerId") || '';
+    const partnerType = localStorage.getItem("partnerType") || '';
+
     const [formLoad, setFormLoad] = useState<boolean>(true);
     const [offerModal, setOfferModal] = useState<boolean>(false);
     const [budgetDataModal, setBudgetDataModal] = useState<any>([]);
@@ -75,7 +79,7 @@ export default function Request() {
         try {
             const refDoc = await addDoc(collection(db, 'budgets_offers'), {
                 budget_id: budgetDataModal.id,
-                partner_id: 'EIje2O927UGDe6mBo2ZK',
+                partner_id: partnerId,
                 created_at: Timestamp.now()
             })
             insertBudgetOfferChatItem(refDoc.id);
@@ -90,7 +94,7 @@ export default function Request() {
         try {
             const refDoc = await addDoc(collection(db, 'budgets_offers_chats'), {
                 budgets_offer_id: budgets_offer_id,
-                partner_id: 'EIje2O927UGDe6mBo2ZK',
+                partner_id: partnerId,
                 type: 1,
                 value: formValue,
                 withdrawal: formWithdrawal,
@@ -113,36 +117,26 @@ export default function Request() {
     }
 
     useEffect(() => {
-        const loadDataBudgets = db
-            .collection("budgets")
-            .orderBy("created_at", "desc")
-            .onSnapshot(snap => {
-                const data: any = snap.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }))
-                if (data.length > 0) {
-                    const loadDataBudgetOfferItem = db
-                        .collection("budgets_offers")
-                        .where("budget_id", '==', data[0].id)
-                        .where("partner_id", '==', 'EIje2O927UGDe6mBo2ZK')
-                        .onSnapshot(snap2 => {
-                            const data2 = snap2.docs.map(doc2 => ({
-                                id: doc2.id,
-                                ...doc2.data(),
-                            }))
+        db.collection('budgets')
+        .where("type", '==', partnerType)
+        .orderBy("created_at", "desc")
+        .get().then((snapshot) => {
+            let data: any = [];
+            snapshot.forEach(doc => {
+                if (doc.exists) {
+                    console.log( doc.data() )
 
-                            if (data2.length > 0) {
-                                setBudgetsData([]);
-                                setBudgetsData(data);
-                            }
-                        });
+                    data.push({
+                        id: doc.id,
+                    ...doc.data(),
+                    });
+                    
+                } else {
                 }
-                setFormLoad(false);
-            });
-        return () => {
-            loadDataBudgets();
-        }
+            })
+            setBudgetsData(data);
+            setFormLoad(false);
+        });
     }, []);
 
     return (<>
@@ -168,7 +162,7 @@ export default function Request() {
                     />
                     <Conteudo>
                         <TopFiltros>
-                            <div>Solicitações de orçamentos</div>
+                            <div>Orçamentos enviados</div>
                             <div className="botao-filtro">
                                 <FaSlidersH />
                             </div>
@@ -177,7 +171,7 @@ export default function Request() {
                         <ListagemCards>
                             {
                                 budgetsData.length === 0 ? (
-                                    <div>Nenhuma solicitação no momento.</div>
+                                    <div>Nenhuma orçamento ainda, envie novos em <a href="/partner/request">solicitações</a>.</div>
                                 ) : null
                             }
                             {

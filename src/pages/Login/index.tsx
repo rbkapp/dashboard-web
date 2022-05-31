@@ -19,6 +19,7 @@ import {
 } from "./styles";
 
 import { useAuth } from "contexts/AuthContext";
+import db from 'config/firebase';
 
 export default function Login() {
   const authentication = getAuth();
@@ -35,7 +36,7 @@ export default function Login() {
     const email = loginFormValues.email || '';
     const password = loginFormValues.password || '';
 
-    if(password.length < 6){
+    if (password.length < 6) {
       alert('Sua senha deve ter 6 caracteres ou mais, verifique!');
     } else {
       checkUser(email, password);
@@ -47,7 +48,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(authentication, email, password)
-      .then((response: any) => {
+        .then((response: any) => {
           //console.log('user: '+JSON.stringify(response.user));
 
           localStorage.setItem("userId", response.user.uid);
@@ -56,14 +57,14 @@ export default function Login() {
           localStorage.setItem("userPhoneNumber", response.user.providerData.phoneNumber);
           localStorage.setItem("userPhoto", response.user.providerData.photoURL);
           localStorage.setItem("token", response.user.stsTokenManager.refreshToken);
-          
-          window.open('/partner/request', '_self')?.focus();
-          setFormEditable(true);
-      });
+
+          checkPartnerAdmin(response.user.uid)
+        });
 
     } catch (err: any) {
-      //console.error(err);
-      createUser(email, password);
+      alert(err);
+      setFormEditable(true);
+      //createUser(email, password);
     }
   };
 
@@ -77,11 +78,10 @@ export default function Login() {
           localStorage.setItem("userName", response.user.providerData.displayName || '');
           localStorage.setItem("userEmail", response.user.email || '');
           localStorage.setItem("userPhoneNumber", response.user.providerData.phoneNumber || '');
-          localStorage.setItem("userPhoto", response.user.providerData.photoURL || '' );
+          localStorage.setItem("userPhoto", response.user.providerData.photoURL || '');
           localStorage.setItem("token", response.user.stsTokenManager.refreshToken || '');
 
-          window.open('/partner/request', '_self')?.focus();
-          setFormEditable(true);
+          checkPartnerAdmin(response.user.uid);
         });
 
     } catch (err: any) {
@@ -90,6 +90,45 @@ export default function Login() {
       setFormEditable(true);
     }
   };
+
+  const checkPartnerAdmin = (userId: string) => {
+    const loadDataPartnerAdmins = db
+      .collection("partners_admins")
+      .where("user_id", '==', userId)
+      .onSnapshot(snap2 => {
+        const data2: any = snap2.docs.map(doc2 => ({
+          id: doc2.id,
+          ...doc2.data(),
+        }))
+
+        if (data2.length > 0) {
+          //alert('data2[0]: '+JSON.stringify(data2[0].partner_id))
+          const loadDataPartner = db
+            .collection("partners")
+            .doc(data2[0].partner_id)
+            .onSnapshot((doc: { data: () => any; }) => {
+              //alert('doc.data(): '+JSON.stringify(doc.data()))
+              if (doc.data().status) {
+                localStorage.setItem("partnerId", data2[0].partner_id || '');
+                localStorage.setItem("partnerName", doc.data().name || '');
+                localStorage.setItem("partnerCity", doc.data().city || '');
+                localStorage.setItem("partnerType", doc.data().type || '');
+                localStorage.setItem("partnerDocument", doc.data().document || '');
+                localStorage.setItem("partnerPhone", doc.data().phone || '');
+
+                window.open('/partner/request', '_self')?.focus();
+              } else {
+                alert('Sua loja está inativa, faça contato com suporte.');
+                window.open('/logout', '_self')?.focus();
+              }
+              setFormEditable(true);
+            });
+        } else {
+          alert('Você ainda não é admin, cadastre sua empresa.');
+          setFormEditable(true);
+        }
+      });
+  }
 
   useEffect(() => {
     //localStorage.getItem("token") ? alert('token: '+ localStorage.getItem("token")) : alert('no token');
@@ -155,8 +194,10 @@ export default function Login() {
             </Form>
           </div>
         </div>
+        <div className="register">
+          <a href="/sejaparceiro">Cadastre-se sua empresa</a>
+        </div>
       </LoginBox>
-
     </LoginArea>
   )
 }

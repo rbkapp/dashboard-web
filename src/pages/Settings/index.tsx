@@ -71,7 +71,7 @@ export default function Request() {
                             <div className="logo-loja">
                             </div>
                             <div className="infos-preview">
-                                <div className="nome-loja">Ricardo auto-peças</div>
+                                <div className="nome-loja">{localStorage.getItem("partnerName") || ''}</div>
                                 <div className="botoes">
                                     <BtnBranco>editar foto</BtnBranco>
                                     <BtnRemover>remover</BtnRemover>
@@ -83,11 +83,15 @@ export default function Request() {
                                 <div className="titulo-form">Dados da Loja</div>
                                 <Campo>
                                     <div className="icone"><AiOutlineUser /></div>
-                                    <input type="text" value={'Ricardo auto-peças'} placeholder="Nome Fantasia" />
+                                    <input type="text" value={localStorage.getItem("partnerName") || ''} placeholder="Nome Fantasia" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><BiCategory /></div>
-                                    <select name="" id="">
+                                    <select 
+                                    name="" 
+                                    id=""
+                                    value={localStorage.getItem("partnerType") || ''}
+                                    >
                                         <option value="">Categoria</option>
                                         <option value="1">Motos peças e serviços</option>
                                         <option value="2">Veículos leves peças e serviços</option>
@@ -100,7 +104,7 @@ export default function Request() {
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiContactsLine /></div>
-                                    <input type="text" placeholder="CNPJ" />
+                                    <input type="text" value={localStorage.getItem("partnerDocument") || ''} placeholder="CNPJ" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><AiOutlineUser /></div>
@@ -112,7 +116,7 @@ export default function Request() {
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiSmartphoneLine /></div>
-                                    <input type="text" placeholder="Telefone" />
+                                    <input type="text" value={localStorage.getItem("partnerPhone") || ''} placeholder="Telefone" />
                                 </Campo>
                             </Formulario>
                             <DadosFooter>
@@ -126,31 +130,31 @@ export default function Request() {
                                 <div className="titulo-form">Endereço</div>
                                 <Campo>
                                     <div className="icone"><RiMapPinAddLine /></div>
-                                    <input value={'7900-000'} type="text" placeholder="CEP" />
+                                    <input type="text" placeholder="CEP" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiCommunityLine /></div>
-                                    <input value={'Rua Pedra Negra'} type="text" placeholder="Endereço" />
+                                    <input type="text" placeholder="Endereço" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiCommunityLine /></div>
-                                    <input value={'7336'} type="text" placeholder="Número" />
+                                    <input  type="text" placeholder="Número" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiCommunityLine /></div>
-                                    <input value={'Esquina'} type="text" placeholder="Complemento" />
+                                    <input type="text" placeholder="Complemento" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiCommunityLine /></div>
-                                    <input value={'Lagoinha'} type="text" placeholder="Bairro" />
+                                    <input type="text" placeholder="Bairro" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiMapPinAddLine /></div>
-                                    <input value={'Porto Velho'} type="text" placeholder="Cidade" />
+                                    <input value={localStorage.getItem("partnerCity") || ''} type="text" placeholder="Cidade" />
                                 </Campo>
                                 <Campo>
                                     <div className="icone"><RiMapPinAddLine /></div>
-                                    <input value={'RO'} type="text" placeholder="Estado" />
+                                    <input type="text" placeholder="Estado" />
                                 </Campo>
                             </Formulario>
                             <DadosFooter>

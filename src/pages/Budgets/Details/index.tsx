@@ -30,6 +30,10 @@ const RequestDetails: React.FC = (props) => {
 
     const messagesEndRef = useRef(null);
 
+    const userId = localStorage.getItem("userId") || '';
+    const partnerId = localStorage.getItem("partnerId") || '';
+    const partnerType = localStorage.getItem("partnerType") || '';
+
     const [formLoad, setFormLoad] = useState<boolean>(true);
     const [budgetsData, setBudgetsData] = useState<any>([]);
     const [userData, setUserData] = useState<any>([]);
@@ -64,7 +68,7 @@ const RequestDetails: React.FC = (props) => {
         try {
             const refDoc = addDoc(collection(db, 'budgets_offers_chats'), {
                 budgets_offer_id: dataBudgetOfers[0]?.id,
-                partner_id: 'EIje2O927UGDe6mBo2ZK',
+                partner_id: partnerId,
                 type: 3,
                 description: formMessage,
                 created_at: Timestamp.now()
@@ -85,7 +89,7 @@ const RequestDetails: React.FC = (props) => {
             .onSnapshot((doc: { data: () => any; }) => {
                 if (doc) {
                     setBudgetsData(doc.data());
-                    console.log('doc.data()[0].user_id: ' + doc.data()[0].user_id)
+                    console.log('doc.data()[0].user_id : ' + doc.data()[0].user_id)
                     const loadDataUserItem = db
                         .collection("users")
                         .doc(doc.data()[0].user_id)
@@ -99,7 +103,7 @@ const RequestDetails: React.FC = (props) => {
 
         const loadDataPartnerItem = db
             .collection("partners")
-            .doc('EIje2O927UGDe6mBo2ZK')
+            .doc(partnerId)
             .onSnapshot((doc: { data: () => any; }) => {
                 if (doc) {
                     setPartnerData(doc.data());
@@ -109,14 +113,14 @@ const RequestDetails: React.FC = (props) => {
         const loadDataBudgetOfferItem = db
             .collection("budgets_offers")
             .where("budget_id", '==', id)
-            .where("partner_id", '==', 'EIje2O927UGDe6mBo2ZK')
+            .where("partner_id", '==', partnerId)
             .onSnapshot((snapshot: { docs: any[]; }) => {
                 const listItems: any = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data(),
                 }))
                 setDataBudgetOfers(listItems);
-                console.log('listItems[0].id: ' + listItems[0].id);
+                console.log('listItems[0].id : ' + listItems[0].id);
                 const loadDataBudgetOferChats =
                     db
                         .collection("budgets_offers_chats")
@@ -165,7 +169,7 @@ const RequestDetails: React.FC = (props) => {
                     >
                         <DadosOrcamento>
                             <div>Orçamento { budgetsData?.status == 1 ? 'em ABERTO por ' : 'ENCERRADO por '} -  <span>{userData?.name}</span> <span>(#{id})</span></div>
-                            <div><a href="/budgets" className="botaoVoltar">voltar</a></div>
+                            <div><a href="/partner/budgets" className="botaoVoltar">voltar</a></div>
                         </DadosOrcamento>
                         <ChatContainer>
                             <ResumoOrcamento>
@@ -187,7 +191,7 @@ const RequestDetails: React.FC = (props) => {
                                     <div className="caracteristicas">para {budgetsData?.brand} {budgetsData?.model} - {budgetsData?.year}, {budgetsData?.color}</div>
                                 </div>
                                 {
-                                    budgetsData?.status == 1 ? (
+                                    budgetsData?.status == 'dfd' ? (
                                         <div className="botao">
                                             <button>encerrar</button>
                                         </div>
@@ -222,7 +226,7 @@ const RequestDetails: React.FC = (props) => {
                                                                 </div>
                                                                 <div>
                                                                     <div className="titulo">Entrega:</div>
-                                                                    <div className="valor gratis">
+                                                                    <div className="valor">
                                                                         {
                                                                             dataBudgetOfer?.delivery ?
                                                                                 dataBudgetOfer?.delivery_value == 0 ?
@@ -233,7 +237,7 @@ const RequestDetails: React.FC = (props) => {
                                                                 </div>
                                                                 <div>
                                                                     <div className="titulo">Retirada:</div>
-
+                                                                    <div className="valor">{dataBudgetOfer?.withdrawal ? 'SIM' : 'NÃO'}</div>
                                                                 </div>
                                                                 {
                                                                     dataBudgetOfer?.delivery ? (
@@ -296,6 +300,33 @@ const RequestDetails: React.FC = (props) => {
                                                         </div>
                                                     </BoxMensagem_Admin>
                                                 </LinhaMensagem_Admin>
+                                            )
+                                        }
+
+                                        if(budgetsData?.status == 2 ){
+                                            return (
+                                                <LinhaMensagem
+                                                    key={index}
+                                                >
+                                                    <BoxMensagem>
+                                                        <div className="avatar">
+                                                            <img
+                                                                src={fotoSolicitacao}
+                                                                alt="foto"
+                                                                width={35}
+                                                                height={35}
+                                                            />
+                                                        </div>
+                                                        <div className="mensagem">
+                                                            <div className="usuario">
+                                                                <div>{userData?.name}</div>
+                                                            </div>
+                                                            <div className="texto">
+                                                                Orçamento encerrado
+                                                            </div>
+                                                        </div>
+                                                    </BoxMensagem>
+                                                </LinhaMensagem>
                                             )
                                         }
                                     })
