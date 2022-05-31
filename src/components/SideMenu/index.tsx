@@ -31,7 +31,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ opend, displayMenu }) => {
     >
 
       <div className="rebimboka">
-        <img className="logo" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/logo_white.png" />
+        <a href="/partner/request">
+          <img className="logo" src="https://rebimboka-public.nyc3.digitaloceanspaces.com/webapp/logo_white.png" />
+        </a>
       </div>
 
       <nav>
